@@ -128,8 +128,8 @@ class FeedTableViewController: UITableViewController, FeedTableViewCellDelegate 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "ShowUsersFromFeed" {
             let usersTableViewController = segue.destination as! UsersTableViewController
-            usersTableViewController.users                = usersLikedPost
-            usersTableViewController.navigationItemTitle  = "Likes"
+            usersTableViewController.users = usersLikedPost
+            usersTableViewController.navigationItemTitle = "Likes"
         }
     }
 }
