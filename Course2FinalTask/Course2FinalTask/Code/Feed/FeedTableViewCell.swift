@@ -9,12 +9,6 @@
 import UIKit
 import DataProvider
 
-protocol FeedTableViewCellDelegate : AnyObject {
-    func likePost(cell: FeedTableViewCell, withAnimation: Bool)
-    func watchSubsribers(cell: FeedTableViewCell)
-    func watchProfile(cell: FeedTableViewCell)
-}
-
 class FeedTableViewCell: UITableViewCell {
     
     @IBOutlet weak var authorAvatarImageView: UIImageView!
@@ -26,10 +20,12 @@ class FeedTableViewCell: UITableViewCell {
     @IBOutlet weak var descriptionLabel: UILabel!
     @IBOutlet weak var bigLikeImageView: UIImageView!
     
-    weak var delegate: FeedTableViewCellDelegate?
+    weak var delegate: FeedTableViewController?
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        
+        registerTapGestureRecognizers()
         
         addGestureRecognizers()
         bigLikeImageView.alpha = 0.0
@@ -37,10 +33,6 @@ class FeedTableViewCell: UITableViewCell {
     
     @IBAction func likePostButtonPressed(_ sender: UIButton) {
         delegate?.likePost(cell: self, withAnimation: false)
-    }
-    
-    @objc func tapOnImageGestureRecognizerPressed() {
-        delegate?.likePost(cell: self, withAnimation: true)
     }
     
     @objc func tapToWatchProfileGestureRecognizerPressed() {
@@ -51,16 +43,33 @@ class FeedTableViewCell: UITableViewCell {
         delegate?.watchSubsribers(cell: self)
     }
     
+    @objc func showBigLikeAnimation() {
+        UIView.animate(withDuration: 0.1, delay: 0.0, options: [.curveLinear], animations: {
+            self.bigLikeImageView.alpha = 1.0
+        }, completion: {_ in
+            UIView.animate(withDuration: 0.3, delay: 0.2, options: [.curveEaseOut], animations: {
+                self.bigLikeImageView.alpha = 0
+            }, completion: nil)
+        })
+        
+        if likeButton.tintColor == UIColor.lightGray {
+            delegate?.likePost(cell: self, withAnimation: true)
+        }
+    }
+    
+    func registerTapGestureRecognizers() {
+        
+        let tapBigLike = UITapGestureRecognizer(target: self, action: #selector(showBigLikeAnimation))
+        tapBigLike.numberOfTapsRequired = 2
+        postImageView.addGestureRecognizer(tapBigLike)
+    }
+    
     func addGestureRecognizers() {
-        let tapOnImageGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(tapOnImageGestureRecognizerPressed))
-        tapOnImageGestureRecognizer.numberOfTapsRequired = 2
         
         let tapToWatchSubscribersGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(tapToWatchSubscribersGestureRecognizerPressed))
         tapToWatchSubscribersGestureRecognizer.numberOfTapsRequired = 1
         
-        postImageView.addGestureRecognizer(tapOnImageGestureRecognizer)
         likedByCountLabel.addGestureRecognizer(tapToWatchSubscribersGestureRecognizer)
-        
         addTapToWatchProfileGestureRecognizer(element: authorAvatarImageView)
         addTapToWatchProfileGestureRecognizer(element: authorUsernameLabel)
         addTapToWatchProfileGestureRecognizer(element: createdTimeLabel)
@@ -72,4 +81,5 @@ class FeedTableViewCell: UITableViewCell {
         
         element.addGestureRecognizer(tapToWatchProfileGestureRecognizer)
     }
+    
 }

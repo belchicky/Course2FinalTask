@@ -68,19 +68,29 @@ class UsersTableViewController: UITableViewController, UserTableViewCellDelegate
         }
     }
     
+//    private func findUserFromCell(cell: UserTableViewCell) -> User? {
+//        if let indexPath = findIndexPathFor(cell: cell) {
+//            if let currentUsers = users {
+//                return currentUsers[indexPath.row]
+//            }
+//
+//            return nil
+//        } else {
+//            return nil
+//        }
+//    }
+
     private func findUserFromCell(cell: UserTableViewCell) -> User? {
-        if let indexPath = findIndexPathFor(cell: cell) {
-            if let currentUsers = users {
-                return currentUsers[indexPath.row]
-            }
-            
-            return nil
-        } else {
-            return nil
-        }
+        guard let indexPath = findIndexPathFor(cell: cell) else { return nil }
+        guard let currentUsers = users else { return nil }
+        return currentUsers[indexPath.row]
     }
+              
+   
     
     private func findIndexPathFor(cell: UserTableViewCell) -> IndexPath? {
         return tableView.indexPath(for: cell)
     }
 }
+
+

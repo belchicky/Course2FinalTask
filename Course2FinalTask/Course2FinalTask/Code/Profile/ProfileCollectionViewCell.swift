@@ -15,13 +15,13 @@ class ProfileCollectionViewCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        self.postImageView = UIImageView.init()
+        self.postImageView = UIImageView()
     }
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         
-        self.postImageView = UIImageView.init()
+        self.postImageView = UIImageView()
     }
     
 }

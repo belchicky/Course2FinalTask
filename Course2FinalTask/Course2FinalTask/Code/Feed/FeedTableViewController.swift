@@ -9,9 +9,10 @@
 import UIKit
 import DataProvider
 
-class FeedTableViewController: UITableViewController, FeedTableViewCellDelegate {
+class FeedTableViewController: UITableViewController {
     
     private var usersLikedPost = [User]()
+    public var post: [Post] = DataProviders.shared.postsDataProvider.feed()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,7 +30,8 @@ class FeedTableViewController: UITableViewController, FeedTableViewCellDelegate 
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "FeedCell", for: indexPath) as! FeedTableViewCell
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "FeedCell", for: indexPath) as? FeedTableViewCell
+            else { return UITableViewCell() }
         
         let currentPost = DataProviders.shared.postsDataProvider.feed()[indexPath.row]
         
@@ -58,30 +60,28 @@ class FeedTableViewController: UITableViewController, FeedTableViewCellDelegate 
         return cell
     }
     
-    // MARK: - FeedTableViewCellDelegate
-    func likePost(cell: FeedTableViewCell, withAnimation: Bool) {
-        if let post = findPostFromCell(cell: cell) {
-            if !post.currentUserLikesThisPost {
-                if DataProviders.shared.postsDataProvider.likePost(with: post.id) {
-                    if withAnimation {
-                        UIView.animate(withDuration: 0.1, delay: 0.0, options: [.curveLinear], animations: { [weak cell] in
-                            cell?.bigLikeImageView.alpha = 1.0
-                        }) { (_) in
-                            UIView.animate(withDuration: 0.3, delay: 0.2, options: [.curveEaseOut], animations: { [weak cell] in
-                                cell?.bigLikeImageView.alpha = 0.0
-                                }, completion: { [unowned self] (_) in
-                                    self.tableView.reloadRows(at: [self.tableView.indexPath(for: cell)!], with: .none)
-                            })
-                        }
-                    } else {
-                        self.tableView.reloadRows(at: [tableView.indexPath(for: cell)!], with: .none)
-                    }
+    // MARK: - likePost
+    
+    func likePost(cell: FeedTableViewCell, withAnimation: Bool){
+        if let indexPath = tableView.indexPath(for: cell) {
+            
+            if cell.likeButton.tintColor == UIColor.lightGray {
+                
+                if DataProviders.shared.postsDataProvider.likePost(with: post[indexPath.row].id) {
+                    post[indexPath.row].currentUserLikesThisPost = true
+                    post[indexPath.row].likedByCount += 1
+                    cell.likeButton.tintColor = .blue
                 }
-            } else {
-                if DataProviders.shared.postsDataProvider.unlikePost(with: post.id) {
-                    tableView.reloadRows(at: [tableView.indexPath(for: cell)!], with: .none)
+                
+            } else if cell.likeButton.tintColor == UIColor.blue   {
+                if DataProviders.shared.postsDataProvider.unlikePost(with: post[indexPath.row].id) {
+                    post[indexPath.row].currentUserLikesThisPost = false
+                    post[indexPath.row].likedByCount -= 1
+                    cell.likeButton.tintColor = .lightGray
                 }
             }
+            
+            self.tableView.reloadData()
         }
     }
     
